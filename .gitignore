@@ -1,0 +1,8 @@
+# exclude everything except directory foo/bar
+/build
+/dist
+/drivers
+/venv
+/.idea
+/.pytest_cache
+/__pycache__
