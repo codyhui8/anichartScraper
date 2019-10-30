@@ -33,22 +33,21 @@ class seleniumMain(unittest.TestCase):
 
         mainHTML = BeautifulSoup(driver.page_source, "html.parser")
 
-        seriesTypes = mainHTML.find_all('div', {'class': 'section'})
-
+        seriesTypes = mainHTML.find_all('section', {'class': 'section loaded'})
+        
         exactSeriesType = None
         for typeLists in seriesTypes:
-            type = typeLists.find('h2')
-            if variables.findType in type:
+            type = typeLists.find('h2').find(text=True, recursive=False).strip().lower()
+            if variables.findType.lower() == type:
                 exactSeriesType = typeLists
 
-        allSeries = exactSeriesType.find_all('span', {'ng-repeat': 'b in series | filter:browseVm.filter | orderBy:browseVm.currentSort'})
+        allSeries = exactSeriesType.find_all('div', {'class': 'media-card'})
 
         outputFile = open(os.path.join(self.savePath, time.strftime("%Y%m%d_%H%M%S") + '_testFile.csv'), 'w', encoding='utf-8')
 
         for series in allSeries:
-            seriesName = self.doubleQuote(series.find('a', {'ng-bind-html': '::b[browseVm.titleLanguage]'}).string)
-            seriesScore = series.find('span', {'class': 'score'}).string
-            seriesPopularity = series.find('span', {'class': 'popularity'}).string
+            seriesName = self.doubleQuote(series.find('a', {'class': 'title'}).string)
+            seriesScore,seriesPopularity = [stat.string for stat in series.find_all('span', {'class': 'stat'})]
 
             if '.' in seriesScore:
                 seriesScore = self.doubleQuote(str(re.search(r'\d+\.\d+', seriesScore).group()))
